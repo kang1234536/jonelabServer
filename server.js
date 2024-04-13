@@ -15,10 +15,8 @@ new MongoClient(url).connect().then((client)=>{
   console.log(err)
 })
 
-
-
-app.listen(6060, () => {
-    console.log('http://localhost:6060 에서 서버 실행중')
+app.listen(process.env.PORT || 6060, () => {
+    console.log('서버 실행중')
 })
 
 app.get('/', (req, res) => {
