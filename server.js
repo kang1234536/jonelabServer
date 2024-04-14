@@ -10,6 +10,10 @@ const dbUrl     = process.env.DB_URL    || os.environ['DB_URL'];
 const dbName    = process.env.DB_NAME   || os.environ['DB_NAME'];
 const bcrypt = require('bcrypt')  
 
+console.log(secretKey);
+console.log(dbUrl);
+console.log(dbName);
+
 app.use(express.json());  
 app.use(express.urlencoded( {extended : false } ));
 
