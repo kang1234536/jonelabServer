@@ -12,7 +12,7 @@ const dbName    = process.env.DB_NAME;
 
 const bcrypt = require('bcrypt') 
 
-app.use(express.json()); 
+app.use(express.json());  
 app.use(express.urlencoded( {extended : false } ));
 
 const { MongoClient } = require('mongodb')
