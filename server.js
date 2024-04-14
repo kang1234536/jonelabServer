@@ -10,7 +10,7 @@ const jwt       = require('jsonwebtoken');
 // const dbName    = process.env.DB_NAME   || os.environ['DB_NAME'];
 const bcrypt = require('bcrypt')  
 
-console.log(secretKey);
+console.log(secretKey); 
 console.log(dbUrl);
 console.log(dbName);
 
