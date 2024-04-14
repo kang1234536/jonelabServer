@@ -5,9 +5,9 @@ const app = express();
 require("dotenv").config(); 
 
 const jwt       = require('jsonwebtoken'); 
-// const secretKey = process.env.SECRETKEY || os.environ['SECRETKEY'];
-// const dbUrl     = process.env.DB_URL    || os.environ['DB_URL'];
-// const dbName    = process.env.DB_NAME   || os.environ['DB_NAME'];
+const secretKey = process.env.SECRETKEY || os.environ['SECRETKEY'];
+const dbUrl     = process.env.DB_URL    || os.environ['DB_URL'];
+const dbName    = process.env.DB_NAME   || os.environ['DB_NAME'];
 const bcrypt = require('bcrypt')  
 
 console.log(secretKey); 
