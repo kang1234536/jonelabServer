@@ -19,7 +19,7 @@ const { MongoClient } = require('mongodb')
 
 let db
 new MongoClient(dbUrl).connect().then((client)=>{
-  console.log('DB연결성공')
+  console.log('DB연결성공') 
   db = client.db(dbName)
 }).catch((err)=>{
   console.log(err)
