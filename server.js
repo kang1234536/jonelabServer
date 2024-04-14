@@ -5,9 +5,9 @@ const app = express();
 require("dotenv").config(); 
 
 const jwt       = require('jsonwebtoken'); 
-const secretKey = process.env.SECRETKEY || os.environ['SECRETKEY'];
-const dbUrl     = process.env.DB_URL    || os.environ['DB_URL'];
-const dbName    = process.env.DB_NAME   || os.environ['DB_NAME'];
+// const secretKey = process.env.SECRETKEY || os.environ['SECRETKEY'];
+// const dbUrl     = process.env.DB_URL    || os.environ['DB_URL'];
+// const dbName    = process.env.DB_NAME   || os.environ['DB_NAME'];
 const bcrypt = require('bcrypt')  
 
 console.log(secretKey);
@@ -20,9 +20,9 @@ app.use(express.urlencoded( {extended : false } ));
 const { MongoClient } = require('mongodb')
 
 let db
-new MongoClient(dbUrl).connect().then((client)=>{
+new MongoClient('mongodb+srv://admin:F8seLMgtHPpp4OXB@cluster0.44jq1lp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0').connect().then((client)=>{
   console.log('DB연결성공') 
-  db = client.db(dbName)
+  db = client.db('jonelab')
 }).catch((err)=>{
   console.log(err)
 })
