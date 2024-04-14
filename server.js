@@ -8,7 +8,6 @@ const jwt       = require('jsonwebtoken');
 const secretKey = process.env.SECRETKEY;
 const dbUrl     = process.env.DB_URL;
 const dbName    = process.env.DB_NAME;
-
 const bcrypt = require('bcrypt') 
 
 app.use(express.json());  
