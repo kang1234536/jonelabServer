@@ -1,17 +1,16 @@
 const express = require('express');
 const app = express();
 
-const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
+// .env
+require("dotenv").config();
 
-app.use(passport.initialize());
-app.use(session({
-  secret: 'jonelabSecret',
-  resave : false,
-  saveUninitialized : false
-}))
-app.use(passport.session()); 
+const jwt       = require('jsonwebtoken');
+const secretKey = process.env.SECRETKEY;
+const dbUrl     = process.env.DB_URL;
+const dbName    = process.env.DB_NAME;
+
+
+const bcrypt = require('bcrypt') 
 
 app.use(express.json()); 
 app.use(express.urlencoded( {extended : false } ));
@@ -19,65 +18,73 @@ app.use(express.urlencoded( {extended : false } ));
 const { MongoClient } = require('mongodb')
 
 let db
-const url = 'mongodb+srv://admin:F8seLMgtHPpp4OXB@cluster0.44jq1lp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-new MongoClient(url).connect().then((client)=>{
+new MongoClient(dbUrl).connect().then((client)=>{
   console.log('DB연결성공')
-  db = client.db('jonelab')
+  db = client.db(dbName)
 }).catch((err)=>{
   console.log(err)
 })
-
-// app.listen(6060, () => {
-//     console.log('서버 실행중')
-// })
 
 app.listen(process.env.PORT || 6060, () => {
     console.log('서버 실행중')
 })
 
 app.get('/', (req, res) => {
-  res.send('반갑다')
+  res.send('서버 접속 성공')
 }) 
 
-app.post('/join', async(req, res) => {
-    console.log(req.body);
-    console.log('클라이언트 접속완료')
-    // let result = await db.collection('COM_USER_INFO').find().toArray()
-    let result = await db.collection('COM_USER_INFO').findOne({user_id : req.body.user_id, user_pw :req.body.user_pw})
-    res.send(result)
-}) 
-
-app.post('/login', async(req, res) => {
-    console.log(req.body);
-    console.log('클라이언트 접속완료')
-    // let result = await db.collection('COM_USER_INFO').find().toArray()
-    let result = await db.collection('COM_USER_INFO').findOne({user_id : req.body.user_id, user_pw :req.body.user_pw})
-    res.send(result)
+app.post('/register', async(req, res) => {
+    console.log('회원가입 시도');
+    
+    let idCheck = await db.collection('COM_USER_INFO').findOne({user_id: req.body.user_id});
+    let fResult = {};
+    if (idCheck == null || idCheck == "") {
+        const token = jwt.sign(req.body, secretKey, {expiresIn: "1h"});
+        let result = await db.collection('COM_USER_INFO').insertOne({user_id : req.body.user_id, user_pw : await bcrypt.hash(req.body.user_pw, 10), token : token});
+        console.log(result);
+        res.send({result : result, token : token});
+    }   else {
+        console.log(idCheck);
+        res.send(idCheck);
+    }
 });
 
-passport.use(new LocalStrategy(async (user_id, user_pw, cb) => {
-    let result = await db.collection('COM_USER_INFO').findOne({ user_id : user_id})
-    if (!result) {
-      return cb(null, false, { message: '아이디 DB에 없음' })
-    }
-    if (result.password == user_pw) {
-      return cb(null, result)
-    } else {
-      return cb(null, false, { message: '비번불일치' });
-    }
-  }))
 
+app.post('/login', async(req, res, next) => {
+    console.log('로그인시도');
 
-app.post('/login2', async(req, res, next) => {
-    console.log('??')
-    passport.authenticate('local', (error, user, info) => {
-        if (error) return res.status(500).json(error)
-        if (!user) return res.status(401).json(info.message)
-        req.logIn(user, (err) => {
-          if (err) return next(err)
-          res.redirect('/')
-        })
-    })(req, res, next)
+    let userInfo = await db.collection('COM_USER_INFO').findOne({user_id: req.body.user_id});
+    let message  = '';
+    let token    = req.body.token;
+    if (userInfo == null || userInfo == "") {
+        // 아이디 없음
+        message = '아이디가 존재하지 않습니다.';
+        res.send({errMsg:message});
+    }   else {
+        // 아이디 존재
+        let pwCheck = await bcrypt.compare(req.body.user_pw, userInfo.user_pw);
+        if (pwCheck) {
+            if (req.body.token == null) {
+                delete req.body.token;
+                token = jwt.sign(req.body, secretKey, {expiresIn: "1h"});
+                db.collection('COM_USER_INFO').updateOne({user_id : req.body.user_id}, {$set:{token : token}});
+                res.send(userInfo);
+            } else {
+                if (token == userInfo.token) {
+                    res.send(userInfo);
+                }   else {
+                    message = '해킹의심계정입니다.';
+                    res.send({errMsg : message})
+                }
+            }
+        }   else {
+            message = '비밀번호가 일치하지 않습니다.';
+            res.send({errMsg: message});
+        }
+    }
 
 }); 
+
+
+
 
