@@ -88,9 +88,7 @@ app.post('/login', async(req, res, next) => {
 
 app.post('/getBoard', async(req, res) => {
   console.log('게시판가져오기 콜')
-  // COM_USER_INFO
   let boardInfo = await db.collection('COM_BOARD_INFO').find().toArray();
-  console.log(boardInfo);
   res.send(boardInfo);
 });
 
